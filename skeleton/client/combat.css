@@ -1,0 +1,14 @@
+#aim-hud{position:fixed;left:50%;top:50%;width:0;height:0;pointer-events:none;color:#fff1c9;filter:drop-shadow(0 1px 2px #172b23)}
+#reticle{position:absolute;left:-15px;top:-15px;width:30px;height:30px;border:1px solid #f7edcc99;border-radius:50%;transition:transform .1s,color .1s}
+#reticle::before,#reticle::after,#reticle i::before,#reticle i::after{content:"";position:absolute;background:currentColor}
+#reticle::before{width:2px;height:8px;left:13px;top:-5px}#reticle::after{width:2px;height:8px;left:13px;bottom:-5px}
+#reticle i::before{width:8px;height:2px;left:-5px;top:13px}#reticle i::after{width:8px;height:2px;right:-5px;top:13px}
+#reticle b{position:absolute;left:12px;top:12px;width:4px;height:4px;background:currentColor;border-radius:50%}
+#reticle.locked{color:#f1a284;border-color:#f1a284}#reticle.drawing{transform:scale(.8);color:#f5d47c}
+#attack-charge{position:absolute;left:-28px;top:28px;width:56px;height:3px;border:0;appearance:none;background:#263f36;border-radius:3px;overflow:hidden}
+#attack-charge::-webkit-progress-bar{background:#263f36}#attack-charge::-webkit-progress-value{background:#e6c780}#attack-charge::-moz-progress-bar{background:#e6c780}
+#aim-text{position:absolute;left:-140px;top:41px;width:280px;text-align:center;font-size:11px;letter-spacing:1px}
+.damage-number{position:absolute;color:#ffe3bc;font:bold 19px Consolas,monospace;text-shadow:0 2px 3px #4f3020;transform:translate(-50%,-50%);pointer-events:none}
+.commandbar{max-width:calc(100vw - 275px)}.commandbar .controls{min-width:180px}.commandbar button{white-space:nowrap}
+@media(max-width:1100px){.commandbar .controls{display:none}.commandbar{max-width:calc(100vw - 240px)}}
+@media(max-width:760px){.commandbar{max-width:none}.commandbar button{font-size:11px}.commandbar small{font-size:8px}}

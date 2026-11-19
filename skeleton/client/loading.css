@@ -1,0 +1,19 @@
+#welcome .dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
+#loading { padding: 14px 0 18px; }
+.load-heading, .load-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.load-heading { font-size: 12px; }
+.load-heading strong { font-weight: 500; }
+#load-percent { color: var(--gold); font: 13px Consolas, monospace; }
+#load-progress { display: block; appearance: none; width: 100%; height: 6px; border: 0; border-radius: 4px; overflow: hidden; margin: 12px 0 10px; background: #11291f; accent-color: #dfc186; }
+#load-progress::-webkit-progress-bar { background: #11291f; border-radius: 4px; }
+#load-progress::-webkit-progress-value { background: #dfc186; border-radius: 4px; transition: width .2s ease; }
+#load-progress::-moz-progress-bar { background: #dfc186; border-radius: 4px; }
+#loading #load-detail { font-size: 11px; line-height: 1.8; margin: 0 0 10px; overflow-wrap: anywhere; }
+.load-foot { color: #9cac9a; font-size: 10px; }
+#loading.failed .load-heading, #loading.failed #load-percent { color: #f1b39a; }
+#loading.failed #load-progress::-webkit-progress-value { background: #cb9179; }
+#loading.failed #load-progress::-moz-progress-bar { background: #cb9179; }
+#loading.ready .load-heading { color: #badaae; }
+#retry-load { width: 100%; margin-top: 13px; padding: 10px; border: 1px solid #d8bc7d80; border-radius: 5px; background: #dfc18615; color: #e5cf9c; }
+#retry-load:hover { background: #dfc18630; }
+@media (prefers-reduced-motion: reduce) { #load-progress::-webkit-progress-value { transition: none; } }

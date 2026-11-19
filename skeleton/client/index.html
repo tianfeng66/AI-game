@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#243c32">
+  <title>火柴人领地 · 河谷之境</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23243c32'/%3E%3Cpath d='M12 48L28 16l9 17 7-10 12 25Z' fill='%23d5ba77'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="loading.css">
+  <link rel="stylesheet" href="combat.css">
+  <link rel="stylesheet" href="construction.css">
+  <link rel="stylesheet" href="squad.css">
+</head>
+<body>
+  <canvas id="game" aria-label="河谷地图，单击己方单位接管，点击地面移动，左键拖动框选，点击敌人攻击，H 回家，双击单位化身"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="selection-box" class="hidden" aria-hidden="true"></div>
+  <div id="aim-hud" class="hidden" aria-hidden="true"><div id="reticle"><i></i><b></b></div><progress id="attack-charge" value="1" max="1"></progress><span id="aim-text"></span></div>
+  <header class="topbar">
+    <div class="brand"><span class="crest">山</span><div><h1>火柴人领地</h1><small>河谷之境 <span> / </span> RIVERLANDS</small></div></div>
+    <div class="resources" aria-label="阵营资源">
+      <div><i class="gold">◆</i><span><small>金币</small><b id="gold">—</b></span></div>
+      <div><i class="food">♧</i><span><small>粮食</small><b id="food">—</b></span></div>
+      <div><i class="wood">♠</i><span><small>木材</small><b id="wood">—</b></span></div>
+      <div><i class="ore">⬡</i><span><small>矿石</small><b id="ore">—</b></span></div>
+    </div>
+    <div class="match"><span id="connection">正在连接</span><b id="timer">10:00</b></div>
+  </header>
+  <section class="view-panel panel">
+    <span class="eyebrow">当前视角</span><h2 id="view-title">领主视野</h2>
+    <p id="view-help">单击单位接管，点击地面移动，H 回家。</p>
+    <div class="view-switch"><button id="overview" class="active">俯视地图 <kbd>Esc</kbd></button><button id="possess">化身单位 <kbd>P</kbd></button></div>
+    <div class="objective"><span class="status-dot"></span>占领基地，成为河谷的最后一个阵营</div>
+  </section>
+  <aside class="leaderboard panel"><div class="section-label">阵营战况 <span>得分</span></div><div id="ranks"></div></aside>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <section class="unit-panel panel"><div class="section-label">你的部队 <span id="unit-count">0 / 8</span></div><div id="roster"></div><div class="squad-actions"><button id="squad-attack" disabled>攻击目标 <kbd>A</kbd></button><button id="squad-home" disabled>回家 <kbd>H</kbd></button><span id="selection-count">选中 0</span></div><p id="unit-detail">工人自动采集 · 基地自动生产</p><p class="regen-note">自然恢复 · 每 10 秒恢复最大生命的 1%</p><div id="construction-list"></div></section>
+  <section id="placement-panel" class="panel hidden"><div class="section-label">箭塔选址 <span id="placement-position"></span></div><p>单击锁定位置 · 双击建造 · 己方基地 18 格内</p><p id="placement-help" role="status"></p><div><button id="confirm-build" class="primary">确认施工</button><button id="cancel-build-placement">取消 / Esc</button></div><small>预览不扣费 · 暂停自动出兵 · 放置成功扣 15 金、30 木</small></section>
+  <section id="tower-panel" class="panel hidden"><div class="section-label">箭塔 <span id="tower-level">Lv.1</span></div><p id="tower-stats"></p><div><button id="tower-upgrade" class="primary">升级箭塔</button><button id="tower-close">关闭</button></div><small id="tower-upgrade-cost"></small></section>
+  <section id="base-panel" class="panel hidden"><div class="section-label">基地 <span id="base-level">Lv.1</span></div><p id="base-stats"></p><div><button id="base-upgrade" class="primary">升级基地</button><button id="base-close">关闭</button></div><small id="base-upgrade-cost"></small></section>
+  <section id="node-panel" class="panel hidden"><div class="section-label">资源点 <span id="node-level">Lv.1</span></div><p id="node-stats"></p><div><button id="node-upgrade" class="primary">升级资源</button><button id="node-close">关闭</button></div><small id="node-upgrade-cost"></small></section>
+  <nav class="commandbar panel" aria-label="游戏操作">
+    <button id="upgrade"><kbd>U</kbd><span>阵营升级<small id="upgrade-cost">50 金 · 20 矿</small></span></button>
+    <button id="build"><kbd>B</kbd><span>建造箭塔<small>单击选址 · 双击建造</small></span></button>
+    <button id="cancel-order" disabled><kbd>X</kbd><span>自动行动<small>解除接管与指令</small></span></button>
+    <div class="controls" id="controls">单击接管 · 点击地面移动 · 左键框选<br><strong>H</strong> 回家 · P 化身 · X 自动行动</div>
+  </nav>
+  <aside class="map-panel panel"><div class="section-label">河谷全图 <span>N ↑</span></div><canvas id="minimap" width="200" height="174" aria-label="小地图"></canvas><div class="legend"><span>● 己方</span><span>● 敌方</span><span>◆ 资源</span></div></aside>
+  <div id="result" class="overlay hidden"><section class="dialog"><span class="eyebrow">战局结束</span><h2 id="result-text"></h2><p>再次集结，开启新的河谷争夺。</p><button id="restart" class="primary">开始下一局</button><small>所有在线玩家将一起进入新对局</small></section></div>
+  <div id="welcome" class="overlay"><form id="join-form" class="dialog">
+    <span class="eyebrow">RIVERLANDS / 河谷之境</span><h2>你的领地，从这里开始。</h2>
+    <p>经营森林与矿场，指挥你的部队。<br>或化身一个火柴人，亲自走进战场。</p>
+    <label for="player-name">领主名称</label><input id="player-name" maxlength="16" value="河谷旅人" autocomplete="nickname" required>
+    <section id="loading" aria-label="地图加载进度">
+      <div class="load-heading"><strong id="load-stage" role="status" aria-live="polite">启动加载器</strong><span id="load-percent">0%</span></div>
+      <progress id="load-progress" max="100" value="0" aria-label="地图准备阶段完成度">0%</progress>
+      <p id="load-detail">正在检查本地游戏服务</p>
+      <div class="load-foot"><span>按实际阶段更新</span><span id="load-time">已用 0 秒</span></div>
+      <button id="retry-load" class="hidden" type="button">重新加载</button>
+    </section>
+    <button id="join-button" class="primary" disabled>正在检查游戏服务…</button>
+    <small>WASD 移动 · 空格攻击 · Esc 返回俯视</small>
+    <noscript><p>浏览器禁用了 JavaScript。请启用后重新加载游戏。</p></noscript>
+  </form></div>
+  <script src="startup.js" onerror="document.getElementById('load-stage').textContent='启动文件加载失败';document.getElementById('load-detail').textContent='请重启游戏服务，然后按 Ctrl+F5 刷新。';document.getElementById('retry-load').classList.remove('hidden');document.getElementById('retry-load').onclick=function(){location.reload();}"></script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+#selection-box{position:fixed;pointer-events:none;border:1px solid #e7d392;background:#e7d39224;box-shadow:0 0 0 1px #25463540;z-index:2}
+.squad-actions{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap}.squad-actions button{padding:8px;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:4px;font-size:11px}.squad-actions button:hover{background:#ffffff20}.squad-actions button.active{border-color:#dec181;color:#f3d693}.squad-actions kbd{color:#dac391;font-size:10px;margin-left:3px}#selection-count{font-size:10px;color:#bac9b1;margin-left:auto}

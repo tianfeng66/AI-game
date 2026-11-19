@@ -1,0 +1,24 @@
+{
+  "name": "stickman-territory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "火柴人领地 - 网页联机对战游戏骨架",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node server/test.js",
+    "test:network": "node server/network-test.js",
+    "test:startup": "node server/startup-test.js",
+    "test:combat": "node server/combat-test.js",
+    "test:scene": "node --experimental-vm-modules server/scene-test.js",
+    "test:construction": "node server/construction-test.js",
+    "test:squad": "node server/squad-test.js",
+    "test:input": "node --experimental-vm-modules server/input-test.js",
+    "test:logic": "node server/logic-test.js",
+    "test:all": "npm run test && npm run test:logic && npm run test:combat && npm run test:construction && npm run test:squad && npm run test:startup && npm run test:scene && npm run test:input && npm run test:network"
+  },
+  "dependencies": {
+    "three": "0.180.0",
+    "ws": "^8.16.0"
+  }
+}

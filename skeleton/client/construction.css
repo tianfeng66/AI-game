@@ -1,0 +1,15 @@
+#placement-panel{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);width:350px;max-width:calc(100vw - 32px);padding:19px;border-radius:8px;z-index:3}
+#tower-panel,#base-panel,#node-panel{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);width:330px;max-width:calc(100vw - 32px);padding:19px;border-radius:8px;z-index:3}
+#tower-panel .section-label,#base-panel .section-label,#node-panel .section-label{margin-bottom:9px}
+#tower-panel p,#base-panel p,#node-panel p{font-size:11px;color:#e0cca1;margin:8px 0}
+#tower-panel>div,#base-panel>div,#node-panel>div{display:flex;gap:8px}
+#tower-upgrade,#base-upgrade,#node-upgrade{flex:1;padding:10px;font-size:12px}
+#tower-close,#base-close,#node-close{padding:10px;background:#ffffff0c;border-radius:5px;font-size:11px}
+#tower-panel small,#base-panel small,#node-panel small{display:block;margin-top:11px;font-size:10px;color:var(--muted)}
+#placement-panel .section-label{margin-bottom:9px}#placement-panel p{font-size:11px}#placement-help{min-height:40px;color:#e0cca1;margin:8px 0}
+#placement-panel>div:last-of-type{display:flex;gap:8px}#confirm-build{flex:1;padding:10px;font-size:12px}#cancel-build-placement{padding:10px;background:#ffffff0c;border-radius:5px;font-size:11px}
+#placement-panel small{display:block;margin-top:11px;font-size:10px;color:var(--muted)}.regen-note{font-size:9px;color:#a8c49b;margin-top:5px}
+#construction-list{max-height:125px;overflow:auto}.construction-row{display:grid;grid-template-columns:1fr auto;gap:5px;padding:9px 0 3px;border-top:1px solid var(--line);margin-top:8px;font-size:10px}
+.construction-row button{background:transparent;color:#d6c18d;font-size:10px;padding:0 3px}.construction-row progress{width:100%;height:4px;grid-column:1/-1;accent-color:#dabb75}
+.site-label{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;background:#304333df;color:#f5d695;font-size:10px;padding:4px 7px;border-radius:3px}
+@media(max-width:760px){#placement-panel,#tower-panel,#base-panel,#node-panel{bottom:210px;width:300px}#construction-list{max-height:75px}.regen-note{font-size:8px}}
