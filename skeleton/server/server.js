@@ -9,6 +9,7 @@ const { createGame } = require('./game');
 const PORT = Number(process.env.PORT) || 8080;
 const RECONNECT_GRACE_MS = 60 * 1000;
 let game = createGame();
+let roundId = 1;
 
 // 静态文件服务（托管 client/）
 const clientRoot = path.join(__dirname, '..', 'client');
@@ -128,7 +129,10 @@ wss.on('connection', (ws) => {
         welcome(ws, factionId, name);
         return;
       }
-      if (msg.type === 'restart' && ws._factionId != null && game.state === 'over') {
+      if (['restart','end_game'].includes(msg.type) && msg.roundId != null && msg.roundId !== roundId) return;
+      if (msg.type === 'restart' && ws._factionId != null &&
+          (game.state === 'over' || (game.state === 'running' && msg.roundId === roundId))) {
+        roundId++;
         game = createGame();
         for (const client of wss.clients) if (client.readyState === WebSocket.OPEN) client._buildReplies.clear();
         for (const session of sessions.values()) game.registerPlayer(session.factionId, session.name);
@@ -166,7 +170,7 @@ setInterval(() => {
   game.tick(1 / 20);
   for (const client of wss.clients) {
     if (client.readyState === WebSocket.OPEN && client._factionId != null) {
-      client.send(JSON.stringify(game.serializeFor(client._factionId)));
+      client.send(JSON.stringify({...game.serializeFor(client._factionId), roundId}));
     }
   }
 }, 50);

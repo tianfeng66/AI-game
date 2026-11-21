@@ -11,6 +11,21 @@ function setup(type=UnitType.Warrior){
 function advance(g,seconds){for(let i=0;i<Math.ceil(seconds/.05);i++)g.tick(.05);}
 function attack(g,aimX=0,aimY=-1){g.handleMessage(1,{type:'control',dx:0,dy:0,attack:true,aimX,aimY});g.tick(.05);}
 {
+  const {g,a,b}=setup();
+  g.handleMessage(2,{type:'release'});
+  const ally={...b,id:99999,x:.2,y:-1.4};
+  g.units.push(ally);
+  g.handleMessage(2,{type:'order_attack',unitIds:[b.id,ally.id],targetKind:'unit',targetId:a.id});
+  // Both squad members are in reach. The second becomes closer during the wind-up.
+  b.y=-1;attack(g);
+  const hp=b.hp,allyHp=ally.hp;
+  ally.x=0;ally.y=-.5;
+  advance(g,.2);
+  assert.ok(b.hp<hp);
+  assert.equal(ally.hp,allyHp);
+  console.log('✓ 两名队员集火时，敌方一次反击只扣出手时锁定队员的生命');
+}
+{
   const {g,a}=setup();assert.equal(a.maxHp,180);assert.equal(a.hp,180);assert.equal(g.serializeFor(1).units.find(u=>u.id===a.id).attack,21.6);
   a.hp=90;g.handleMessage(1,{type:'release'});assert.equal(a.maxHp,150);assert.equal(a.hp,75);
   for(let i=0;i<20;i++){g.handleMessage(1,{type:'possess',unitId:a.id});assert.equal(a.maxHp,180);assert.equal(a.hp,90);g.handleMessage(1,{type:'release'});}

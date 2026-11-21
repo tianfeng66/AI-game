@@ -131,6 +131,15 @@ async function connect(name, clientId) {
     assert.equal(a.state.you.resources.wood,0);
     console.log('PASS Restart resets build request cache and charges the new site');
     console.log('✓ Restart creates a fresh shared map and restores both players');
+    const firstRound=a.state.roundId;
+    a.send({type:'restart',roundId:firstRound});
+    await waitFor(()=>a.state.roundId===firstRound+1 && b.state.roundId===firstRound+1,'restart during play');
+    a.send({type:'end_game',roundId:firstRound});
+    b.send({type:'end_game',roundId:firstRound+1});
+    await waitFor(()=>a.state.matchState==='over' && b.state.matchState==='over','manual end broadcast');
+    assert.equal(a.state.resultText,'本局已提前结束');
+    a.send({type:'restart',roundId:firstRound+1});
+    await waitFor(()=>a.state.matchState==='running' && b.state.matchState==='running','restart after manual end');
 
     const rc = await connect('重连测试','network-test-reconnect');
     const rcId = rc.id;

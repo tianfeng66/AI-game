@@ -521,21 +521,29 @@ function createGame() {
     u.attackAimX=u.aimX;u.attackAimY=u.aimY;
     // An empty swing / shot still has an animation and consumes its cooldown.
     u.pendingAttack={at:game.time+(u.type===UnitType.Archer?.38:.16)};
+    if(u.type!==UnitType.Archer){
+      const targets=enemies(u.faction).filter(t=>inMeleeReach(u,t));
+      u.pendingAttack.target=u.order
+        ? targets.find(t=>t.kind===u.order.kind && t.e.id===u.order.id)
+        : targets.sort((a,b)=>dist(u.x,u.y,a.e.x,a.e.y)-dist(u.x,u.y,b.e.x,b.e.y))[0];
+    }
+  }
+  function inMeleeReach(u,target){
+    const x=target.e.x-u.x,y=target.e.y-u.y,d=Math.hypot(x,y);
+    return d<=Config.unitStats[u.type].range+target.radius && (d<.2||(x*u.aimX+y*u.aimY)/d>.35);
   }
   function resolveAttack(u) {
     if(!u.pendingAttack || game.time<u.pendingAttack.at)return;
+    const target=u.pendingAttack.target;
     u.pendingAttack=null;
     const s=Config.unitStats[u.type], amount=s.attack*(u.possessed?Config.possessBuffAttack:1)*attackMult(u.faction);
     const dx=u.aimX,dy=u.aimY;
     u.attackAimX=dx;u.attackAimY=dy;
     if(u.type===UnitType.Archer){
       game.projectiles.push({id:nextId++,faction:u.faction,ownerId:u.id,x:u.x,y:u.y,dx,dy,remaining:s.range,speed:24,damage:amount});
-    }else{
-      const candidates=enemies(u.faction).filter(t=>{
-        const x=t.e.x-u.x,y=t.e.y-u.y,d=Math.hypot(x,y);
-        return d<=s.range+t.radius && (d<.2||(x*dx+y*dy)/d>.35);
-      }).sort((a,b)=>dist(u.x,u.y,a.e.x,a.e.y)-dist(u.x,u.y,b.e.x,b.e.y));
-      if(candidates[0])hitTarget(candidates[0],amount,u);
+    }else if(target && target.e.faction!==u.faction && target.e.hp>0 &&
+             combatTarget(target.kind,target.e.id)===target.e && inMeleeReach(u,target)){
+      hitTarget(target,amount,u);
     }
   }
   function tickProjectiles(dt) {
@@ -643,7 +651,10 @@ function createGame() {
       } else {
         f.resources.food = 0;
         for (const u of game.units.slice()) {
-          if (u.faction === fid) damageUnit(u, Config.starvationDamagePerTick, null);
+          if (u.faction === fid) {
+            u.starvationDamage=(u.starvationDamage||0)+Config.starvationDamagePerTick;
+            damageUnit(u, Config.starvationDamagePerTick, null);
+          }
         }
       }
     }
@@ -951,6 +962,12 @@ function createGame() {
 
   // ---------- 主循环 ----------
   function tick(dt) {
+      case 'end_game':
+        if(game.state==='running'){
+          game.state='over';
+          game.resultText='本局已提前结束';
+        }
+        break;
     game.time += dt;
 
     if (game.state === 'waiting') {
@@ -1057,6 +1074,7 @@ function createGame() {
         return out;
       }),
       bases: game.bases.map(b => ({ id: b.id, faction: b.faction, x: r2(b.x), y: r2(b.y), hp: r2(b.hp), maxHp: b.maxHp, level: b.level, spawnInterval: r2(baseSpawnIntervalValue(b)) })),
+        if (u.starvationDamage) out.starvationDamage = u.starvationDamage;
       towers: game.towers.map(t => ({ id: t.id, faction: t.faction, x: r2(t.x), y: r2(t.y), hp: r2(t.hp), maxHp: t.maxHp, level: t.level, attack: r2(towerAttackValue(t)), range: towerRangeValue(t) })),
       nodes: game.nodes.map(n => ({ id: n.id, type: n.type, x: r2(n.x), y: r2(n.y), amount: n.amount, maxAmount: n.maxAmount, level: n.level, owner: n.owner })),
       factions: Object.keys(game.factions).map(k => {

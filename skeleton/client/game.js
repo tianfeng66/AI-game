@@ -204,7 +204,12 @@ function onServerMessage(event){
   setSelection([...selectedIds]);
   if(placement&&(msg.matchState==='over'||!msg.bases.some(b=>b.faction===faction)))cancelPlacement();
   if(msg.matchState==='over'&&(selectedTowerId!=null||selectedBaseId!=null||selectedNodeId!=null))clearBuildingSelection();
-  if(old?.matchState==='over'&&msg.matchState!=='over'){keys.clear();setSelection([]);endSelectionDrag();clearBuildingSelection();view.focus.set(0,0,0);view.zoom=1;toast('新的战局已经开始');}
+  if(old && (old.roundId!==msg.roundId || (old.matchState==='over' && msg.matchState!=='over'))){
+    keys.clear();attackQueued=false;previousPossession=null;dragging=false;
+    if(placement)cancelPlacement();
+    setSelection([]);endSelectionDrag();clearBuildingSelection();
+    view.focus.set(0,0,0);view.zoom=1;toast('新的战局已经开始');
+  }
   const id=msg.you.possessedUnitId;
   if(id!==previousPossession){
     keys.clear();attackQueued=false;
@@ -285,7 +290,14 @@ $('tower-upgrade').onclick=upgradeTower;$('tower-close').onclick=closeTower;
 $('base-upgrade').onclick=upgradeBase;$('base-close').onclick=clearBuildingSelection;
 $('node-upgrade').onclick=upgradeResource;$('node-close').onclick=clearBuildingSelection;
 $('construction-list').onclick=event=>{const button=event.target.closest('button[data-site]');if(button)send({type:'cancel_build',siteId:Number(button.dataset.site)});};
-$('restart').onclick=()=>send({type:'restart'});
+function requestRoundAction(type){
+  if(latest?.matchState!=='running')return;
+  const prompt=type==='restart'?'所有玩家将进入新对局。确定重新开始？':'所有玩家将结束本局并进入结算。确定结束游戏？';
+  if(window.confirm(prompt))send({type,roundId:latest.roundId});
+}
+$('end-game').onclick=()=>requestRoundAction('end_game');
+$('restart-game').onclick=()=>requestRoundAction('restart');
+$('restart').onclick=()=>send({type:'restart',roundId:latest?.roundId});
 $('roster').onclick=event=>{const b=event.target.closest('button');if(b)chooseUnit(Number(b.dataset.id),event.shiftKey);};
 $('roster').ondblclick=event=>{const b=event.target.closest('button');if(b)possess(Number(b.dataset.id));};
 window.addEventListener('resize',()=>{aimPointer.x=Math.min(aimPointer.x,innerWidth);aimPointer.y=Math.min(aimPointer.y,innerHeight);view?.resize();});

@@ -390,12 +390,17 @@ export class ValleyScene {
   }
 
   sync(state) {
-    if(this.state && state.time<this.state.time){for(const l of this.damageLabels)l.el.remove();this.damageLabels=[];}
+    const newRound=this.state && this.state.roundId!==state.roundId;
+    if(newRound && this.towerShots){
+      for(const shot of this.towerShots)this.scene.remove(shot.g);
+      this.towerShots.length=0;
+    }
+    if(newRound || (this.state && state.time<this.state.time)){for(const l of this.damageLabels)l.el.remove();this.damageLabels=[];}
     this.receivedAt=performance.now();
     this.state=state;
     const reconcile=(list,map,create) => {
       const ids=new Set(list.map(x=>x.id));
-      for(const [id,obj] of map) if(!ids.has(id)){this.scene.remove(obj);obj.userData.label?.remove();obj.traverse(o=>{if(o.geometry && !Object.values(geometries).includes(o.geometry))o.geometry.dispose();if(o.material && ![...mats.values()].includes(o.material))o.material.dispose();});map.delete(id);}
+      for(const [id,obj] of map) if(newRound || !ids.has(id)){this.scene.remove(obj);obj.userData.label?.remove();obj.traverse(o=>{if(o.geometry && !Object.values(geometries).includes(o.geometry))o.geometry.dispose();if(o.material && ![...mats.values()].includes(o.material))o.material.dispose();});map.delete(id);}
       for(const data of list) {
         let obj=map.get(data.id);
         if(obj && obj.userData.faction!=null && obj.userData.faction!==data.faction){this.scene.remove(obj);obj.userData.label?.remove();map.delete(data.id);obj=null;}
@@ -403,6 +408,11 @@ export class ValleyScene {
         const old=obj.userData.target;
         if(old?.hp>data.hp && old.maxHp===data.maxHp){
           const el=document.createElement('span');el.className='damage-number';el.textContent='−'+Number((old.hp-data.hp).toFixed(1));
+          const hunger=(data.starvationDamage||0)-(old.starvationDamage||0);
+          if(hunger>0){
+            const loss=Number((old.hp-data.hp).toFixed(1));
+            el.textContent=(loss>hunger?'受击 −'+Number((loss-hunger).toFixed(1))+' · ':'')+'断粮 −'+Math.min(loss,hunger);
+          }
           document.getElementById('labels').append(el);this.damageLabels.push({el,x:data.x,z:data.y,born:performance.now()});
         }
         obj.userData.target=data;
